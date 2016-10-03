@@ -7,8 +7,11 @@ Integrantes
 + Danillo Gomes Santos
 
 **Big Idea** Jogos
+
 **Essential Questions** Como modelar uma batalha pokemon?
+
 **Challenge** Modelagem 3D de dois pokemons lutando
+
 
 |Guiding Questions| Guiding Activities/Resources | What Did We Learn? |
 | --------------- | ---------------------------- | ------------------ |
