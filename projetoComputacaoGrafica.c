@@ -31,11 +31,9 @@ float angle=0.0;
 // Vetor atual representando a diração da camera
 float lx=0.0f,lz=-1.0f;
 // Coordenadas de X e Z para posição da camera
-float x=30.0f,z=35.0f;
+float x=5.0f,z=55.0f;
 //Incializa a figura com cor branca
 float red=1.0f, blue=1.0f, green=1.0f;
-// Angulo de rotação da figura
-float anglem = 0.0f;
 //--------------------------------------------------------------------
 
 void changeSize(int w, int h) {
@@ -75,56 +73,49 @@ void renderScene(void) {
     // Set na camera e visualização
     gluLookAt(x, 1.0f, z,
                 x+lx, 1.0f, z+lz,
-                0.0f, 1.0f,  0.0f);
-    //TODO - arrumar para criar o "chão"
-    glColor3f(0.0f, 0.0f, 0.0f);
+                0.0f, 1.0f, 0.0f);
+    glPushMatrix();
+    glColor3f(0.4f, 0.5f, 0.2f);
     glBegin(GL_QUADS);
         glVertex3f(-100.0f, 0.0f, -100.0f);
         glVertex3f(-100.0f, 0.0f,  100.0f);
         glVertex3f( 100.0f, 0.0f,  100.0f);
         glVertex3f( 100.0f, 0.0f, -100.0f);
     glEnd();
-
-    glRotatef(anglem, 0.0f, 1.0f, 0.0f);
+    glPopMatrix();
+    glPushMatrix();
     glColor3f(red,green,blue);
+    glRotatef(-90.0,1.0,0.0,0.0);
     DrawAllMeshes();
-    SetUpLights();
-    anglem+=0.1f;
-    // clear the drawing buffer.
-
+    glPopMatrix();
+    //Desenhando a pokebola
+    glPushMatrix();
     glTranslatef(0.0,0.0,-10.0);
-
     glColor3f(1, 0, 0); 
-
     glRotatef(xRotated,1.0,0.0,0.0);
     glRotatef(yRotated,0.0,1.0,0.0);
     glRotatef(zRotated,0.0,0.0,1.0);
-
-    //glScalef(1.0,1.0,1.0);
-
     drawHalfSphere(radius);
     glRotatef(180,1.0,0.0,0.0);
     glColor3f(1, 1, 1);
     drawHalfSphere(radius);
     glRotatef(90,1.0,0.0,0.0);
-
     glColor3f(0, 0, 0); 
     drawCircle(radius + 0.01, radius/10.);
-
     glRotatef(90,1.0,0.0,0.0);
     glColor3f(1, 1, 1);
     glTranslatef(0.0,0.0,radius);
     drawCircle(0.2, 0.1);
     drawCircle(0.2, 0.1);
+    glPopMatrix();
     glFlush();
+    SetUpLights();
     glutSwapBuffers();
-
 }
 
 void processNormalKeys(unsigned char key, int x, int y) {
     if (key == 27)
         exit(0);
-
     switch (key) {
         case 'w':
             if (xRotated > 360) xRotated = 0;
@@ -188,27 +179,6 @@ float fraction = 0.1f;
     }
 }
 
-int main(int argc, char **argv) {
-    // Inicializa o glut e cria a janela
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-    glutInitWindowPosition(100,100);
-    glutInitWindowSize(320,320);
-    glutCreateWindow("Projeto de Computacao Grafica");
-    // Registra os callbacks
-    InitMesh();
-    glutDisplayFunc(renderScene);
-    glutReshapeFunc(changeSize);
-    glutIdleFunc(renderScene);
-    // Registro de callback para teclado
-    glutKeyboardFunc(processNormalKeys);
-    glutSpecialFunc(processSpecialKeys);
-    // Ciclo de evento para não encerrar
-    glutMainLoop();
-    return 1;
-}
-
-
 void drawHalfSphere(GLfloat r) {
     int i, j;
     int scaley = 20;
@@ -233,11 +203,11 @@ void drawHalfSphere(GLfloat r) {
     }
     glEnd();
 }
+
 void drawCircle(float radius, float thickness) {
     float x,y;
     int j;
     glBegin(GL_QUADS);
-
     x = (float)radius * cos(359 * MY_PI/180.0f);
     y = (float)radius * sin(359 * MY_PI/180.0f);
     for(j = 0; j < 360; j++) {
@@ -249,4 +219,24 @@ void drawCircle(float radius, float thickness) {
         glVertex3f(x, y, thickness/2);
     }
     glEnd();
+}
+
+int main(int argc, char **argv) {
+    // Inicializa o glut e cria a janela
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
+    glutInitWindowPosition(100,100);
+    glutInitWindowSize(1024,720);
+    glutCreateWindow("Projeto de Computacao Grafica");
+    // Registra os callbacks
+    InitMesh();
+    glutDisplayFunc(renderScene);
+    glutReshapeFunc(changeSize);
+    glutIdleFunc(renderScene);
+    // Registro de callback para teclado
+    glutKeyboardFunc(processNormalKeys);
+    glutSpecialFunc(processSpecialKeys);
+    // Ciclo de evento para não encerrar
+    glutMainLoop();
+    return 1;
 }
