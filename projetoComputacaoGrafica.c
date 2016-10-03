@@ -11,6 +11,13 @@
 // O importe abaixo é para renderizar um objeto exportado do blender
 #include "func.h"
 
+
+GLfloat xRotated, yRotated, zRotated;
+GLdouble radius=1;
+static const float MY_PI = 3.1415926536f;
+
+void drawHalfSphere(GLfloat r);
+void drawCircle(float radius, float thickness);
 void changeSize(int w, int h);
 void SetUpLights();
 void renderScene(void);
@@ -83,12 +90,63 @@ void renderScene(void) {
     DrawAllMeshes();
     SetUpLights();
     anglem+=0.1f;
+    // clear the drawing buffer.
+
+    glTranslatef(0.0,0.0,-10.0);
+
+    glColor3f(1, 0, 0); 
+
+    glRotatef(xRotated,1.0,0.0,0.0);
+    glRotatef(yRotated,0.0,1.0,0.0);
+    glRotatef(zRotated,0.0,0.0,1.0);
+
+    //glScalef(1.0,1.0,1.0);
+
+    drawHalfSphere(radius);
+    glRotatef(180,1.0,0.0,0.0);
+    glColor3f(1, 1, 1);
+    drawHalfSphere(radius);
+    glRotatef(90,1.0,0.0,0.0);
+
+    glColor3f(0, 0, 0); 
+    drawCircle(radius + 0.01, radius/10.);
+
+    glRotatef(90,1.0,0.0,0.0);
+    glColor3f(1, 1, 1);
+    glTranslatef(0.0,0.0,radius);
+    drawCircle(0.2, 0.1);
+    drawCircle(0.2, 0.1);
+    glFlush();
     glutSwapBuffers();
+
 }
 
 void processNormalKeys(unsigned char key, int x, int y) {
     if (key == 27)
         exit(0);
+
+    switch (key) {
+        case 'w':
+            if (xRotated > 360) xRotated = 0;
+            xRotated += 10;
+            break;
+        case 's':
+            xRotated -= 10;
+            break;
+        case 'q':
+            zRotated += 10;
+            break;
+        case 'a':
+            zRotated -= 10;
+            break;
+        case 'e':
+            yRotated += 10;
+            break;
+        case 'd':
+            yRotated -= 10;
+            break;
+    }
+    glutPostRedisplay();
 }
 
 void processSpecialKeys(int key, int x, int y) {
@@ -148,4 +206,47 @@ int main(int argc, char **argv) {
     // Ciclo de evento para não encerrar
     glutMainLoop();
     return 1;
+}
+
+
+void drawHalfSphere(GLfloat r) {
+    int i, j;
+    int scaley = 20;
+    int scalex = 20;
+    GLfloat v[400][3];
+
+    for (i=0; i<scalex; ++i) {
+        for (j=0; j<scaley; ++j) {
+            v[i*scaley+j][0]=r*cos(j*2*MY_PI/scaley)*cos(i*MY_PI/(2*scalex));
+            v[i*scaley+j][1]=r*sin(i*MY_PI/(2*scalex));
+            v[i*scaley+j][2]=r*sin(j*2*MY_PI/scaley)*cos(i*MY_PI/(2*scalex));
+        }
+    }
+    glBegin(GL_QUADS);
+    for (i=0; i<scalex-1; ++i) {
+        for (j=0; j<scaley; ++j) {
+            glVertex3fv(v[i*scaley+j]);
+            glVertex3fv(v[i*scaley+(j+1)%scaley]);
+            glVertex3fv(v[(i+1)*scaley+(j+1)%scaley]);
+            glVertex3fv(v[(i+1)*scaley+j]);
+        }
+    }
+    glEnd();
+}
+void drawCircle(float radius, float thickness) {
+    float x,y;
+    int j;
+    glBegin(GL_QUADS);
+
+    x = (float)radius * cos(359 * MY_PI/180.0f);
+    y = (float)radius * sin(359 * MY_PI/180.0f);
+    for(j = 0; j < 360; j++) {
+        glVertex3f(x, y, thickness/1);
+        glVertex3f(x, y, -thickness/1);
+        x = (float)radius * cos(j * MY_PI/180.0f);
+        y = (float)radius * sin(j * MY_PI/180.0f);
+        glVertex3f(x, y, -thickness/2);
+        glVertex3f(x, y, thickness/2);
+    }
+    glEnd();
 }
