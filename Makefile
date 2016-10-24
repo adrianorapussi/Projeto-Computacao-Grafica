@@ -1,3 +1,3 @@
 default:
-	gcc -o projetoComputacaoGrafica projetoComputacaoGrafica.c -lz -lm -lglut -lGL -lGLU
+	gcc -o projetoComputacaoGrafica projetoComputacaoGrafica.c -lm -lglut -lGL -lGLU
 	./projetoComputacaoGrafica

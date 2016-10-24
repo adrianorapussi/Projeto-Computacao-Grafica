@@ -1,29 +1,30 @@
 #include <stdio.h>
 #include <stdlib.h>
-#define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glx.h>
 #include <GL/glut.h>
 #include <math.h>
-
 #include "Venusaur.h"
 // O importe abaixo é para renderizar um objeto exportado do blender
 #include "func.h"
 
+#define GL_GLEXT_PROTOTYPES
 
 GLfloat xRotated, yRotated, zRotated;
 GLdouble radius=1;
 static const float MY_PI = 3.1415926536f;
 
+//--------------------------------------------------------------------
+// Declaração de funções
 void drawHalfSphere(GLfloat r);
 void drawCircle(float radius, float thickness);
 void changeSize(int w, int h);
-void SetUpLights();
+void iluminacao(void);
 void renderScene(void);
 void processNormalKeys(unsigned char key, int x, int y);
 void processSpecialKeys(int key, int x, int y);
-
+void timer(void);
 //--------------------------------------------------------------------
 // Variaveis globais
 // Angulo de rotação da camera
@@ -38,7 +39,7 @@ float red=1.0f, blue=1.0f, green=1.0f;
 
 void changeSize(int w, int h) {
     // Prevenção caso a janela tenha uma altura 0
-    if (h == 0){
+    if (h == 0) {
         h = 1;
     }
     float ratio =  w * 1.0 / h;
@@ -53,17 +54,29 @@ void changeSize(int w, int h) {
     glMatrixMode(GL_MODELVIEW);
 }
 
-void SetUpLights() {
-    float pos[] = {10, 10, 10, 0};
-    float ambient[] = {0.3, 0.3, 0.3, 1};
-    float white[] = {1, 1, 1, 1};
-    glEnable(GL_LIGHTING);
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
+void iluminacao (void) {
+    GLfloat luzAmbiente[4]={0.2,0.2,0.2,1.0}; 
+    GLfloat luzDifusa[4]={0.7,0.7,0.7,1.0}; // "cor" 
+    GLfloat luzEspecular[4]={1.0, 1.0, 1.0, 1.0};// "brilho" 
+    GLfloat posicaoLuz[4]={0.0, 50.0, 50.0, 1.0};
+    GLfloat especularidade[4]={1.0,1.0,1.0,1.0}; 
+    GLint especMaterial = 60;
+    // Especifica que a cor de fundo da janela será preta
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    // Habilita o modelo de colorização de Gouraud
+    glShadeModel(GL_SMOOTH);
+    // Define a refletância do material
+    glMaterialfv(GL_FRONT,GL_SPECULAR, especularidade); 
+    // Define a concentração do brilho
+    glMateriali(GL_FRONT,GL_SHININESS,especMaterial);
+    glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, luzDifusa ); 
+    glLightfv(GL_LIGHT0, GL_SPECULAR, luzEspecular ); 
+    glLightfv(GL_LIGHT0, GL_POSITION, posicaoLuz );
     glEnable(GL_COLOR_MATERIAL);
-    glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, white);
-    glLightfv(GL_LIGHT0, GL_POSITION, pos);
+    glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
+    glEnable(GL_DEPTH_TEST);
 }
 
 void renderScene(void) {
@@ -72,8 +85,9 @@ void renderScene(void) {
     glLoadIdentity();
     // Set na camera e visualização
     gluLookAt(x, 1.0f, z,
-                x+lx, 1.0f, z+lz,
-                0.0f, 1.0f, 0.0f);
+              x+lx, 1.0f, z+lz,
+              0.0f, 1.0f, 0.0f);
+
     glPushMatrix();
     glColor3f(0.4f, 0.5f, 0.2f);
     glBegin(GL_QUADS);
@@ -83,11 +97,14 @@ void renderScene(void) {
         glVertex3f( 100.0f, 0.0f, -100.0f);
     glEnd();
     glPopMatrix();
+
     glPushMatrix();
     glColor3f(red,green,blue);
     glRotatef(-90.0,1.0,0.0,0.0);
+    //Desenha o objeto
     DrawAllMeshes();
     glPopMatrix();
+
     //Desenhando a pokebola
     glPushMatrix();
     glTranslatef(0.0,0.0,-10.0);
@@ -108,8 +125,8 @@ void renderScene(void) {
     drawCircle(0.2, 0.1);
     drawCircle(0.2, 0.1);
     glPopMatrix();
-    glFlush();
-    SetUpLights();
+
+    iluminacao();
     glutSwapBuffers();
 }
 
@@ -184,7 +201,6 @@ void drawHalfSphere(GLfloat r) {
     int scaley = 20;
     int scalex = 20;
     GLfloat v[400][3];
-
     for (i=0; i<scalex; ++i) {
         for (j=0; j<scaley; ++j) {
             v[i*scaley+j][0]=r*cos(j*2*MY_PI/scaley)*cos(i*MY_PI/(2*scalex));
@@ -221,6 +237,14 @@ void drawCircle(float radius, float thickness) {
     glEnd();
 }
 
+void timer(void) {
+
+    //TODO
+    // Redesenha o quadrado com as novas coordenadas 
+
+    glutPostRedisplay();
+}
+
 int main(int argc, char **argv) {
     // Inicializa o glut e cria a janela
     glutInit(&argc, argv);
@@ -236,6 +260,11 @@ int main(int argc, char **argv) {
     // Registro de callback para teclado
     glutKeyboardFunc(processNormalKeys);
     glutSpecialFunc(processSpecialKeys);
+
+    //TODO
+    //Evento de animação - IDLE
+    glutIdleFunc(timer);
+
     // Ciclo de evento para não encerrar
     glutMainLoop();
     return 1;
